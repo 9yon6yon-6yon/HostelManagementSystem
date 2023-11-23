@@ -13,9 +13,9 @@
 <!-- Hero Section -->
 <section class="hero">
     <div class="container">
-        <h1 class="display-4">Welcome to Your Starlight Landing Page</h1>
+        <h1 class="display-4">Welcome to Your City university Landing Page</h1>
         <p class="lead">Your tagline or description goes here.</p>
-        <a href="#" class="btn btn-primary">Get Started</a>
+        <a href="./Authentication/login.php" class="btn btn-primary">Login</a>
     </div>
 </section>
 
