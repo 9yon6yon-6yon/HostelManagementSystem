@@ -2,7 +2,7 @@
 // Students/dashboard.php
 
 // Set page-specific variables
-$pageTitle = "Accounts Dashboard";
+$pageTitle = "Provost Dashboard";
 $pages = [
     ['url' => 'dashboard.php', 'label' => 'Dashboard'],
 ];

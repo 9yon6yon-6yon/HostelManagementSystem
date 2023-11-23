@@ -2,7 +2,7 @@
 // Students/dashboard.php
 
 // Set page-specific variables
-$pageTitle = "Accounts Dashboard";
+$pageTitle = "Hostel super Dashboard";
 $pages = [
     ['url' => 'dashboard.php', 'label' => 'Dashboard'],
 ];
