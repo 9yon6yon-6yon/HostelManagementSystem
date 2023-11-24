@@ -1,7 +1,5 @@
 <?php
-// Students/dashboard.php
 
-// Set page-specific variables
 $pageTitle = "Student Dashboard";
 $pages = [
     ['url' => 'dashboard.php', 'label' => 'Dashboard'],

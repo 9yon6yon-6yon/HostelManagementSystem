@@ -2,7 +2,7 @@
 
 require('../Authentication/AuthHandler.php');
 
-session_start();
+
 
 if (isset($_POST['createUser']) || $_POST['action']==='createUser' ) {
     $username = isset($_POST['username']) ? $_POST['username'] : null;

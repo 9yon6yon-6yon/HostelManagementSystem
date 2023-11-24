@@ -41,7 +41,8 @@ class AuthHandler
                     echo json_encode($response);
                     return false;
             }
-
+            session_start();
+            $_SESSION['userRole'] = $userRole;
             // Send JSON response
             header('Content-Type: application/json');
             echo json_encode($response);

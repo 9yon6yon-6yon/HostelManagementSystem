@@ -2,7 +2,6 @@
 
 require('AuthHandler.php');
 
-session_start();
 
 if (isset($_POST['logIn']) || $_POST['action']==='logIn' ) {
     $email =  $_POST['email'] ;
