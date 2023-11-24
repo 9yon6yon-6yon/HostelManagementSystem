@@ -23,7 +23,7 @@ class AuthHandler
                     $response = ['redirect' => '../Admin/dashboard.php'];
                     break;
                 case 'student':
-                    $response = ['redirect' => '../Student/dashboard.php'];
+                    $response = ['redirect' => '../Students/dashboard.php'];
                     break;
                 case 'provost':
                     $response = ['redirect' => '../Provost/dashboard.php'];
