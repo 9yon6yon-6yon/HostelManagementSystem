@@ -7,6 +7,34 @@
   <script src="../assets/lib/datatables-responsive/dataTables.responsive.js"></script>
   <script src="../assets/lib/select2/js/select2.min.js"></script>
   <script src="../assets/js/starlight.js"></script>
-  <script><?php echo $script; ?></script>
+  <script>
+    $(document).ready(function() {
+      <?php echo $script; ?>
+    });
+  </script>
+  <script>
+    $(document).ready(function() {
+      $('body').on('click', 'a[data-action="signout"]', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+          url: 'process.php',
+          method: 'POST',
+          data: {
+            action: 'signout'
+          },
+          dataType: 'json',
+          success: function(response) {
+            console.log(response);
+            window.location.href = '../index.php';
+          },
+          error: function(xhr, status, error) {
+            console.error('Error while signing out:', error);
+          }
+        });
+      });
+    });
+  </script>
   </body>
-</html>
+
+  </html>

@@ -91,7 +91,14 @@ class AuthHandler
 
     public function forgotPassword($email)
     {
-        // Implement logic to send a password reset email
+       
+    }
+    public function signout()
+    {
+        session_start();
+        session_unset();
+        session_destroy();
+        return;
     }
 
     public function updatePassword($email, $newPassword)

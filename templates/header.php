@@ -10,6 +10,8 @@
     <link href="../assets/lib/perfect-scrollbar/css/perfect-scrollbar.css" rel="stylesheet">
     <link href="../assets/lib/datatables/jquery.dataTables.css" rel="stylesheet">
     <link href="../assets/lib/select2/css/select2.min.css" rel="stylesheet">
+    <link href="../assets/lib/rickshaw/rickshaw.min.css" rel="stylesheet">
+    <link href="../assets/lib/morris.js/morris.css" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/starlight.css">
 </head>
 
