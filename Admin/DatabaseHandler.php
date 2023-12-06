@@ -29,6 +29,26 @@ class DatabaseHandler
 
         return $users;
     }
+    public function getUserInfo($id)
+    {
+        $query = "SELECT id, name, mail,role,is_active ,verified, user_info.* FROM users 
+        RIGHT JOIN user_info ON (users.id = user_info.usr) WHERE users.id = $id";
+
+        $result = mysqli_query($this->db, $query);
+
+        if (!$result) {
+            die("Error fetching users: " . mysqli_error($this->db));
+        }
+
+        $result = mysqli_query($this->db, $query);
+
+        if (!$result) {
+            die("Error fetching notices: " . mysqli_error($this->db));
+        }
+        $user =  mysqli_fetch_assoc($result);
+
+        return $user;
+    }
     public function getNotices()
     {
         $query = "SELECT notice_id, title, visibility, date FROM notice";
@@ -63,7 +83,7 @@ class DatabaseHandler
         if (!$result) {
             die("Error fetching notices: " . mysqli_error($this->db));
         }
-
-        return $result;
+        $notice =  mysqli_fetch_assoc($result);
+        return $notice;
     }
 }

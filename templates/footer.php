@@ -18,15 +18,18 @@
         e.preventDefault();
 
         $.ajax({
-          url: 'process.php',
+          url: '../Authentication/process.php',
           method: 'POST',
           data: {
             action: 'signout'
           },
           dataType: 'json',
           success: function(response) {
-            console.log(response);
-            window.location.href = '../index.php';
+            if (response.success) {
+              window.location.href = '../index.php';
+            } else {
+              console.error('Error while signing out:', response.message);
+            }
           },
           error: function(xhr, status, error) {
             console.error('Error while signing out:', error);

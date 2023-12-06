@@ -1,8 +1,5 @@
 <?php
 
-require('../Authentication/AuthHandler.php');
-
-
 
 
 $response = [];
@@ -11,13 +8,8 @@ $response = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
         switch ($_POST['action']) {
-            case 'createUser':
-                $username =  $_POST['username'];
-                $email =  $_POST['email'];
-                $password =  $_POST['password'];
-                $role =  $_POST['role'];
-                $authHandler = new AuthHandler();
-                return $authHandler->createUser($username, $email, $password, $role);
+            case '#':
+                $response = ['success' => '# request'];
                 break;
             default:
                 $response = ['error' => 'Invalid action for POST request'];
