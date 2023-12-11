@@ -68,3 +68,17 @@ In assets folder make config.php file with the given code below and fill up the 
         public static $password = '';
         public static $dbname = '';
     }
+
+
+## Mail setup
+Authentication/SetupMail.php
+
+    <?php
+    class MailSetup {
+        public static $SMTP_HOST='smtp.example.com';
+        public static $SMTP_PORT = 25;
+        public static $SMTP_USERNAME = '';
+        public static $SMTP_PASSWORD = '';
+        public static $SMTP_ENCRYPTION='tls';
+        public static $SMTP_FROM_ADDRESS='';
+    }
