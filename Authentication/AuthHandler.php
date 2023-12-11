@@ -1,9 +1,14 @@
 <?php
 
-use PHPMailer\PHPMailer\PHPMailer;
-
 require_once('../assets/db/db-config.php');
 require_once('SetupMail.php');
+
+require ('./PHPMailer/src/PHPMailer.php');
+require ('./PHPMailer/src/SMTP.php');
+require ('./PHPMailer/src/Exception.php');
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
 
 
 class AuthHandler
@@ -21,7 +26,8 @@ class AuthHandler
 
         try {
 
-            $mail->isSMTP(); // Send using SMTP
+            $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output
+            $mail->isSMTP();  
             $mail->Host = MailSetup::$SMTP_HOST; // Set the SMTP server to send through
             $mail->SMTPAuth = true; // Enable SMTP authentication
             $mail->Username = MailSetup::$SMTP_USERNAME; // SMTP username
@@ -120,8 +126,8 @@ class AuthHandler
             $stmt->close();
 
             if ($result) {
-                // $this->sendConfirmationEmail($username, $email, $password, $role);
-                $response = ['success' => 'User created successfully'];
+                $this->sendConfirmationEmail($username, $email, $password, $role);
+                $response = ['success' => 'User created successfully and email has been sent.'];
             } else {
                 $response = ['error' => 'Failed to create user'];
             }

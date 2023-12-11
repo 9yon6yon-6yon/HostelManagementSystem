@@ -29,10 +29,8 @@
     │   ├── forgotPassword.php
     │   ├── header.php
     │   ├── login.php
-    │   ├── PHPMailer
     │   ├── process.php
     │   ├── resetPassword.php
-    │   └── SSLCommerz
     ├── HostelSuper
     │   ├── dashboard.php
     │   └── process.php
@@ -59,7 +57,7 @@
     └── uploads
 
 ## Must include
-In assets folder make config.php file with the given code below and fill up the necessary information based on your setup:
+In `assets/db` folder make config.php file with the given code below and fill up the necessary information based on your setup:
 
     <?php
     class DatabaseConfig {
@@ -71,7 +69,7 @@ In assets folder make config.php file with the given code below and fill up the 
 
 
 ## Mail setup
-Authentication/SetupMail.php
+`Authentication/SetupMail.php`
 
     <?php
     class MailSetup {
