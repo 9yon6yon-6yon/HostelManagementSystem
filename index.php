@@ -10,7 +10,7 @@
         <meta name="copyright" content />
         <meta name="description" content="Landing Page Flexbox Template">
         <meta name="keywords" content>
-        <title>Landing Page Flexbox Template</title>
+        <title>City University Hostel</title>
 
         <!-- Page Styles -->
         <link rel="stylesheet" href="./assets/css/styles.css">

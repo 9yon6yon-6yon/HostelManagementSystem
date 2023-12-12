@@ -1,14 +1,6 @@
 <?php
 
 require_once('../assets/db/db-config.php');
-require_once('SetupMail.php');
-
-require ('./PHPMailer/src/PHPMailer.php');
-require ('./PHPMailer/src/SMTP.php');
-require ('./PHPMailer/src/Exception.php');
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
 
 
 class AuthHandler
@@ -19,42 +11,6 @@ class AuthHandler
     {
         global $db;
         $this->db = $db;
-    }
-    private function sendConfirmationEmail($username, $email, $password, $role)
-    {
-        $mail = new PHPMailer(true);
-
-        try {
-
-            $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output
-            $mail->isSMTP();  
-            $mail->Host = MailSetup::$SMTP_HOST; // Set the SMTP server to send through
-            $mail->SMTPAuth = true; // Enable SMTP authentication
-            $mail->Username = MailSetup::$SMTP_USERNAME; // SMTP username
-            $mail->Password = MailSetup::$SMTP_PASSWORD; // SMTP password
-            $mail->SMTPSecure = MailSetup::$SMTP_ENCRYPTION; // Enable encryption
-            $mail->Port = MailSetup::$SMTP_PORT; // TCP port to connect to
-            $mail->setFrom(MailSetup::$SMTP_FROM_ADDRESS, "City University");
-            $mail->addAddress($email, $username); // Add a recipient
-
-            // Email content
-            $mail->isHTML(true); // Set email format to HTML
-            $mail->Subject = 'Welcome to Your Website';
-
-            // Customized HTML email content
-            $mail->Body = "
-            <p>Hello $username,</p>
-            <p>Welcome to Your Website! We are excited to have you on board.</p>
-            <p>Feel free to explore our platform and let us know if you have any questions.</p><br>
-            <p>Name: $username.<br>Email: $email <br>Password: $password <br>Role: $role</p>
-            <p>Feel free to explore our platform and let us know if you have any questions.</p>
-            <p>Best regards,<br>Admin</p>
-        ";
-
-            $mail->send();
-        } catch (Exception $e) {
-            echo "Mailer Error: {$mail->ErrorInfo}";
-        }
     }
 
 
@@ -126,7 +82,6 @@ class AuthHandler
             $stmt->close();
 
             if ($result) {
-                $this->sendConfirmationEmail($username, $email, $password, $role);
                 $response = ['success' => 'User created successfully and email has been sent.'];
             } else {
                 $response = ['error' => 'Failed to create user'];
