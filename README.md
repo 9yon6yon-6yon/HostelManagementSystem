@@ -68,7 +68,7 @@ In `assets/db` folder make config.php file with the given code below and fill up
     }
 
 
-## Mail setup
+## Mail setup but doesn't work
 `Authentication/SetupMail.php`
 
     <?php
