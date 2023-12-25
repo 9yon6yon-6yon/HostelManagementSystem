@@ -1,5 +1,6 @@
 # .gitignore
 config.php
 SetupMail.php
-/PHPMailer
+/PHPMailer-6.9.1
 /SSLCommerz
+icons

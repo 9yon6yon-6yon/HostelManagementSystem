@@ -2,15 +2,7 @@
 
     Root Folder
     ├── Accounts
-    │   ├── dashboard.php
-    │   └── process.php
     ├── Admin
-    │   ├── createuser.php
-    │   ├── dashboard.php
-    │   ├── DatabaseHandler.php
-    │   ├── notice.php
-    │   ├── process.php
-    │   └── viewusers.php
     ├── assets
     │   ├── css
     │   ├── db
@@ -24,24 +16,10 @@
     │   └── lib    
     ├── Authentication
     │   ├── AuthHandler.php
-    │   ├── base.php
-    │   ├── footer.php
-    │   ├── forgotPassword.php
-    │   ├── header.php
-    │   ├── login.php
-    │   ├── process.php
-    │   ├── resetPassword.php
     ├── HostelSuper
-    │   ├── dashboard.php
-    │   └── process.php
-    ├── hostel.txt
     ├── index.php
     ├── Provost
-    │   ├── dashboard.php
-    │   └── process.php
     ├── Students
-    │   ├── dashboard.php
-    │   └── process.php
     ├── templates
     │   ├── accounts-menu.php
     │   ├── admin-menu.php

@@ -21,47 +21,57 @@ foreach ($notices as $notice) {
     </tr>";
 }
 
+$rolesData = $databaseHandler->getRolesCountWithTotalUsers();
+$roles = $rolesData['roles'];
+$count = $rolesData['count'];
+$total_users = $rolesData['totalUsers'];
+$applicationData = $databaseHandler->getApplicationTypesCount();
+$applicationTypes = $applicationData['applicationTypes'];
+$applicationCount = $applicationData['count'];
+$applicationpending = $applicationData['totalcount'];
 
 $content = "
 <div class=\"row row-sm mg-t-20\">
     <div class=\"col-sm-6 col-xl-3\">
-        <div class=\"card pd-20 pd-sm-25\">
-            <div class=\"d-flex align-items-center justify-content-between mg-b-10\">
-                <h6 class=\"card-body-title tx-12 tx-spacing-1\">List</h6>
-                <a href=\"viewusers.php\" class=\"tx-gray-600 hover-info\"><i class=\"icon ion-more\"></i></a>
-            </div><!-- d-flex -->
-            <h2 class=\"tx-purple tx-lato tx-center mg-b-15\">Show All User</h2>
-        </div><!-- card -->
+        <a href=\"viewusers.php\" class=\"card-link\">
+            <div class=\"card pd-20 pd-sm-25\">
+                <div class=\"d-flex align-items-center justify-content-between mg-b-10\">
+                    <h6 class=\"card-body-title tx-12 tx-spacing-1\">No. of Users</h6>
+                </div><!-- d-flex -->
+                <h2 class=\"tx-purple tx-lato tx-center mg-b-15\">$total_users</h2>
+             
+            </div><!-- card -->
+        </a>
     </div><!-- col-3 -->
-    <div class=\"col-sm-6 col-xl-3 mg-t-20 mg-sm-t-0\">
-        <div class=\"card bg-purple tx-white pd-25\">
-            <div class=\"d-flex align-items-center justify-content-between mg-b-10\">
-                <h6 class=\"card-body-title tx-12 tx-white-8 tx-spacing-1\">Sales Revenue</h6>
-                <a href=\"\" class=\"tx-white-8 hover-white\"><i class=\"icon ion-more\"></i></a>
-            </div><!-- d-flex -->
-            <h2 class=\"tx-lato tx-center mg-b-15\">$34,330</h2>
-            <p class=\"mg-b-0 tx-12 op-8\">+ 6.2% compared last month</p>
-        </div><!-- card -->
+    <div class=\"col-sm-6 col-xl-3\">
+        <a href=\"applications.php\" class=\"card-link\">
+            <div class=\"card pd-20 pd-sm-25\">
+                <div class=\"d-flex align-items-center justify-content-between mg-b-10\">
+                    <h6 class=\"card-body-title tx-12 tx-spacing-1\">No. of Pending Applications</h6>
+                </div><!-- d-flex -->
+                <h2 class=\"tx-purple tx-lato tx-center mg-b-15\">$applicationpending</h2>
+            </div><!-- card -->
+        </a>
     </div><!-- col-3 -->
-    <div class=\"col-sm-6 col-xl-3 mg-t-20 mg-xl-t-0\">
-        <div class=\"card pd-20 pd-sm-25\">
-            <div class=\"d-flex align-items-center justify-content-between mg-b-10\">
-                <h6 class=\"card-body-title tx-12 tx-spacing-1\">Sales Revenue</h6>
-                <a href=\"\" class=\"tx-gray-600 hover-info\"><i class=\"icon ion-more\"></i></a>
-            </div><!-- d-flex -->
-            <h2 class=\"tx-teal tx-lato tx-center mg-b-15\">$34,330</h2>
-            <p class=\"mg-b-0 tx-12\"><span class=\"tx-danger\">- 3.4%</span> compared last month</p>
-        </div><!-- card -->
+    <div class=\"col-sm-6 col-xl-3\">
+        <a href=\"viewusers.php\" class=\"card-link\">
+            <div class=\"card pd-20 pd-sm-25\">
+                <div class=\"d-flex align-items-center justify-content-between mg-b-10\">
+                    <h6 class=\"card-body-title tx-12 tx-spacing-1\">No. of Users</h6>
+                </div><!-- d-flex -->
+                <h2 class=\"tx-purple tx-lato tx-center mg-b-15\">$total_users</h2>
+            </div><!-- card -->
+        </a>
     </div><!-- col-3 -->
-    <div class=\"col-sm-6 col-xl-3 mg-t-20 mg-xl-t-0\">
-        <div class=\"card bg-teal tx-white pd-25\">
-            <div class=\"d-flex align-items-center justify-content-between mg-b-10\">
-                <h6 class=\"card-body-title tx-12 tx-white-8 tx-spacing-1\">Sales Revenue</h6>
-                <a href=\"\" class=\"tx-white-8 hover-white\"><i class=\"icon ion-more\"></i></a>
-            </div><!-- d-flex -->
-            <h2 class=\"tx-lato tx-center mg-b-15\">$34,330</h2>
-            <p class=\"mg-b-0 tx-12 op-8\">+ 6.2% compared last month</p>
-        </div><!-- card -->
+    <div class=\"col-sm-6 col-xl-3\">
+        <a href=\"viewusers.php\" class=\"card-link\">
+            <div class=\"card pd-20 pd-sm-25\">
+                <div class=\"d-flex align-items-center justify-content-between mg-b-10\">
+                    <h6 class=\"card-body-title tx-12 tx-spacing-1\">No. of Users</h6>
+                </div><!-- d-flex -->
+                <h2 class=\"tx-purple tx-lato tx-center mg-b-15\">$total_users</h2>
+            </div><!-- card -->
+        </a>
     </div><!-- col-3 -->
 </div><!-- row -->
 <div class=\"row row-sm mg-t-20\">
@@ -205,11 +215,9 @@ $content = "
                         <th class=\"pd-y-5\">Date</th>
                         <th class=\"pd-y-5\">Title</th>
                         <th class=\"pd-y-5 tx-right\">Visibility</th>
-
                     </tr>
                 </thead>
                 <tbody>
-                 
                     $tableRows    
                 </tbody>
             </table>
