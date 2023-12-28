@@ -10,6 +10,7 @@ require_once '../PHPMailer-6.9.1/src/PHPMailer.php';
 require_once '../PHPMailer-6.9.1/src/SMTP.php';
 require_once '../PHPMailer-6.9.1/src/Exception.php';
 
+date_default_timezone_set('asia/dhaka');
 
 class AuthHandler
 {
@@ -163,7 +164,7 @@ class AuthHandler
             $stmt = $this->db->prepare($query);
 
             if ($stmt) {
-                $name = 'Guest'; 
+                $name = 'Guest';
                 $stmt->bind_param("sss", $name, $email, $hashedPassword);
                 $result = $stmt->execute();
                 $stmt->close();
@@ -186,7 +187,7 @@ class AuthHandler
         $stmt = $this->db->prepare($query);
 
         if ($stmt) {
-            $stmt->bind_param("sss", $userId, $token, $expiresAt);
+            $stmt->bind_param("iss", $userId, $token, $expiresAt);
             $result = $stmt->execute();
             $stmt->close();
 
@@ -232,7 +233,7 @@ class AuthHandler
             $mail->Body = "
             <div style='font-size: 18px; width:90%; max-width: 600px; margin: 5px auto 35px auto;'>
                 <div style='margin-bottom: 10px;'>Hi!</div>
-                <div>You requested to recover your account on City University Hostel. To reset your account password, please follow the link
+                <div>You requested to recover your account on <span style='color: red;'>City University Hostel</span>. To reset your account password, please follow the link
                     below:</div>
                 <div style='margin-top: 25px; text-align:center;'>
                     <a href='http://localhost/HostelManagementSystem/Authentication/resetPassword.php?token=$token&email=$email'
@@ -259,7 +260,7 @@ class AuthHandler
     public function resetPassword($email, $newPassword, $token)
     {
         // Check if the token is valid
-        $query = "SELECT user_id FROM password_reset_tokens WHERE user_id = (SELECT id FROM users WHERE mail = ?) AND token = ? ";
+        $query = "SELECT user_id FROM password_reset_tokens WHERE user_id = (SELECT id FROM users WHERE mail = ?) AND token = ? AND expires_at > NOW()";
         $stmt = $this->db->prepare($query);
 
         if ($stmt) {
@@ -390,8 +391,23 @@ class AuthHandler
     }
     public function permanentlyRemoveUser($userId)
     {
-        // Implement logic to permanently remove a user
-        // Return success or error message
+        $query = "DELETE FROM users WHERE id = ?";
+        $stmt = $this->db->prepare($query);
+
+        if ($stmt) {
+            $stmt->bind_param("i", $userId);
+            $result = $stmt->execute();
+            $stmt->close();
+            if ($result) {
+                $response = ['success' => 'User deleted'];
+                header('Content-Type: application/json');
+                echo json_encode($response);
+            }
+        }
+        $response = ['success' => 'Can\'t delete user'];
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        return false;
     }
 
 
@@ -498,6 +514,148 @@ class AuthHandler
         echo json_encode($response);
         return true;
     }
+    public function makeAnnouncement($id, $title, $visibility, $description)
+    {
+        $date = date('Y-m-d H:i:s.u');
+        $query = "INSERT INTO notice ( title, description, visibility,date, updated_by) VALUES (?, ?, ?, ?, ?)";
+        $stmt = $this->db->prepare($query);
+
+        if ($stmt) {
+            $stmt->bind_param("ssssi", $title, $description, $visibility, $date, $id);
+            $result = $stmt->execute();
+            $stmt->close();
+
+            if ($result) {
+                $response = ['success' => 'Announcement Added Successfully'];
+            } else {
+                $response = ['error' => 'Failed to make announcement.'];
+            }
+
+            header('Content-Type: application/json');
+            echo json_encode($response);
+
+            return $result;
+        }
+        $response = ['error' => 'Failed to make announcement '];
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        return false;
+    }
+    public function requestPayment($id, $paymentInfo)
+    {
+        $mail = new PHPMailer(true);
+
+        try {
+
+            $mail->SMTPDebug = 0;
+            $mail->isSMTP();
+            $mail->Host = MailSetup::$SMTP_HOST;
+            $mail->SMTPAuth = true;
+            $mail->Username = MailSetup::$SMTP_USERNAME;
+            $mail->Password = MailSetup::$SMTP_PASSWORD;
+            $mail->SMTPSecure = MailSetup::$SMTP_ENCRYPTION;
+            $mail->Port = MailSetup::$SMTP_PORT;
+            $mail->setFrom(MailSetup::$SMTP_FROM_ADDRESS, "City University");
+            $mail->addAddress($paymentInfo['user_email'], $paymentInfo['user_name']);
+            $mail->isHTML(true);
+            $mail->Subject = 'Requesing to clear payment';
+            $mail->Body = "
+            <div style='font-size: 18px; width:90%; max-width: 600px; margin: 5px auto 35px auto;'>
+                <div style='margin-bottom: 10px;'>Hi {$paymentInfo['user_name']} !</div>
+                <div>You are requested to clear your due on <span style='color: red;'>City University Hostel</span>. Please log in to your account and clear your payment or visit the accounts section</div>
+        
+            </div>
+            ";
+
+            $mail->send();
+        } catch (Exception $e) {
+            error_log("Email sending failed: " . $e->getMessage());
+            throw new Exception("Failed to send confirmation email.");
+        }
+    }
+    public function approvePayment($id)
+    {
+        $query = "UPDATE payment SET status = ? WHERE payment_id = ?";
+        $stmt = $this->db->prepare($query);
+        $status = 'paid';
+        if ($stmt) {
+            $stmt->bind_param("si", $status, $id);
+            $result = $stmt->execute();
+            $stmt->close();
+            if ($result) {
+                $response = ['success' => 'Payment approved Successfully'];
+            } else {
+                $response = ['error' => 'Failed to approve Payment.'];
+            }
+
+            header('Content-Type: application/json');
+            echo json_encode($response);
+
+            return $result;
+        }
+        $response = ['error' => 'Failed to approve payment updated request '];
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        return false;
+    }
+    public function getUserInfo($id)
+    {
+        $query = "SELECT id, name, mail, role, is_active, verified, user_info.* FROM users 
+                  LEFT JOIN user_info ON (users.id = user_info.usr) WHERE users.id = ?";
+        $stmt = mysqli_prepare($this->db, $query);
+
+        if (!$stmt) {
+            die("Error preparing statement: " . mysqli_error($this->db));
+        }
+
+        mysqli_stmt_bind_param($stmt, "i", $id);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $user = mysqli_fetch_assoc($result);
+
+        mysqli_stmt_close($stmt);
+        header('Content-Type: application/json');
+        echo json_encode($user);
+        return true;
+    }
+    public function changePassword($id, $currentPassword, $newPassword)
+    {
+        $query = "SELECT mail FROM users WHERE id =?";
+        $stmt = mysqli_prepare($this->db, $query);
+
+        if (!$stmt) {
+            die("Error preparing statement: " . mysqli_error($this->db));
+        }
+        mysqli_stmt_bind_param($stmt, "i", $id);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $mail = mysqli_fetch_assoc($result);
+        mysqli_stmt_close($stmt);
+        $hashedPassword = $this->getHashedPassword($mail['mail']);
+
+        if ($hashedPassword !== null && password_verify($currentPassword, $hashedPassword)) {
+            $hashNewPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+            $stmt = $this->db->prepare("UPDATE users SET password = ? WHERE id = ?");
+            $stmt->bind_param("si", $hashNewPassword, $id);
+
+            if ($stmt->execute()) {
+                $response = ['success' => 'Password updated successfully.'];
+            } else {
+                $response = ['error' => 'Failed to update password.'];
+            }
+            header('Content-Type: application/json');
+            echo json_encode($response);
+            return true;
+        }
+        $response = ['error' => 'Failed to change password'];
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        return false;
+    }
+    public function paynow($id){
+        
+    }
+
 }
 
 error_reporting(E_ALL);

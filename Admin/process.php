@@ -19,8 +19,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 return $authHandler->createUser($username, $email, $password, $role);
                 break;
             case 'permanently_remove_user':
-                $userId = $_POST['userId']; // Assuming you have a userId in the form data
-                $response = $authHandler->permanentlyRemoveUser($userId);
+                $userId = $_POST['userId'];
+                $authHandler = new AuthHandler();
+                return $authHandler->permanentlyRemoveUser($userId);
+                break;
+            case 'make-notice':
+                $id = $_SESSION['user_id'];
+                $title = $_POST['title'];
+                $visibility = $_POST['visibility'];
+                $description = $_POST['description'];
+                $authHandler = new AuthHandler();
+                return $authHandler->makeAnnouncement($id, $title, $visibility, $description);
+                break;
+            case 'requestPayment':
+                $id = $_POST['paymentId'];
+                $databaseHandler = new DatabaseHandler();
+                $paymentInfo = $databaseHandler->getPaymentInfo($id);
+                $authHandler = new AuthHandler();
+                return $authHandler->requestPayment($id, $paymentInfo);
+                break;
+            case 'approvePayment':
+                $id = $_POST['paymentId'];
+                $authHandler = new AuthHandler();
+                return $authHandler->approvePayment($id);
+                break;
+            case 'change-password':
+                $id = $_SESSION['user_id'];
+                $currentPassword = $_POST['currentPassword'];
+                $newPassword = $_POST['newPassword'];
+                $renewPassword = $_POST['renewPassword'];
+                if (empty($currentPassword) || empty($newPassword) || empty($renewPassword)) {
+                    $response = ['error' => 'Please fill in all required fields.'];
+                } elseif ($newPassword !== $renewPassword) {
+                    $response = ['error' => 'Password and Re-enter New Password does not match.'];
+                } else {
+                    $authHandler = new AuthHandler();
+                    $response = $authHandler->changePassword($id, $currentPassword, $newPassword);
+                }
+                return $response;
+                break;
+            case 'load-user':
+                $id = $_SESSION['user_id'];
+                $authHandler = new AuthHandler();
+                return $authHandler->getUserInfo($id);
                 break;
 
             default:

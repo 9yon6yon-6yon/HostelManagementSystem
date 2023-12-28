@@ -193,4 +193,59 @@ class DatabaseHandler
 
         return $application;
     }
+    public function getPaymentInfo($id = null)
+    {
+        if ($id === null) {
+            $query = "SELECT p.payment_id, u.name AS user_name, p.amount, p.status
+            FROM payment p
+            JOIN users u ON p.user = u.id
+            WHERE p.status != 'paid'
+            ORDER BY p.date DESC;";
+        } else {
+            $query = "SELECT p.*, u.name AS user_name , u.mail AS user_email
+            FROM payment p
+            JOIN users u ON p.user = u.id
+            WHERE payment_id=?";
+        }
+
+        $stmt = mysqli_prepare($this->db, $query);
+
+        if (!$stmt) {
+            die("Error preparing statement: " . mysqli_error($this->db));
+        }
+
+        if ($id !== null) {
+            mysqli_stmt_bind_param($stmt, "i", $id);
+        }
+
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $payment = mysqli_fetch_assoc($result);
+
+        mysqli_stmt_close($stmt);
+
+        return $payment;
+    }
+    public function getpayments()
+    {
+        $query = "SELECT p.payment_id, p.date, u.name AS user_name, p.amount, p.status
+        FROM payment p
+        JOIN users u ON p.user = u.id
+        WHERE p.status != 'paid'
+        ORDER BY p.date DESC;";
+
+        $result = mysqli_query($this->db, $query);
+
+        if (!$result) {
+            die("Error fetching notices: " . mysqli_error($this->db));
+        }
+
+        $payments = [];
+
+        while ($row = mysqli_fetch_assoc($result)) {
+            $payments[] = $row;
+        }
+
+        return $payments;
+    }
 }

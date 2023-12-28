@@ -28,4 +28,9 @@
         <span class="menu-item-label">Applications</span>
     </div><!-- menu-item -->
 </a><!-- sl-menu-link -->
-
+<a href="payments.php" class="sl-menu-link">
+    <div class="sl-menu-item">
+        <i class="menu-item-icon fa fa-credit-card tx-20"></i>
+        <span class="menu-item-label">Payments</span>
+    </div><!-- menu-item -->
+</a><!-- sl-menu-link -->

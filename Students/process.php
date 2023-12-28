@@ -1,6 +1,6 @@
 <?php
-
-
+session_start();
+include '../Authentication/AuthHandler.php';
 
 $response = [];
 
@@ -8,8 +8,10 @@ $response = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
         switch ($_POST['action']) {
-            case '#':
-                $response = ['success' => '# request'];
+            case 'pay-bill':
+                $authHandler = new AuthHandler();
+                $id = $_SESSION['user_id'];
+                return $authHandler->paynow($id);
                 break;
             default:
                 $response = ['error' => 'Invalid action for POST request'];
