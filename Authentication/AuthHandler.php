@@ -152,6 +152,102 @@ class AuthHandler
     }
     public function forgotPassword($email)
     {
+
+        $userId = $this->getUserId($email);
+
+        if (!$userId) {
+
+            $hashedPassword = password_hash('password', PASSWORD_DEFAULT);
+
+            $query = "INSERT INTO users (name, mail, password) VALUES (?, ?, ?)";
+            $stmt = $this->db->prepare($query);
+
+            if ($stmt) {
+                $name = 'Guest'; 
+                $stmt->bind_param("sss", $name, $email, $hashedPassword);
+                $result = $stmt->execute();
+                $stmt->close();
+            }
+            if (!$result) {
+                $response = ['error' => 'Failed to create user'];
+                header('Content-Type: application/json');
+                echo json_encode($response);
+                return false;
+            }
+
+            // ID of the newly created user
+            $userId = $this->getUserId($email);
+        }
+        // Generate password reset token
+        $token = bin2hex(random_bytes(32));
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+1 hour'));
+        // Insert the password reset token into the database
+        $query = "INSERT INTO password_reset_tokens (user_id, token, expires_at) VALUES (?, ?, ?)";
+        $stmt = $this->db->prepare($query);
+
+        if ($stmt) {
+            $stmt->bind_param("sss", $userId, $token, $expiresAt);
+            $result = $stmt->execute();
+            $stmt->close();
+
+            if ($result) {
+                // Send the reset link to the user's email
+                $emailSent = $this->sendResetLink($email, $token);
+
+                if (!$emailSent) {
+                    $response = ['success' => 'Reset link sent to your email.'];
+                } else {
+                    $response = ['error' => 'Failed to send reset link to your email.'];
+                }
+            } else {
+                $response = ['error' => 'Failed to create password reset token.'];
+            }
+
+            header('Content-Type: application/json');
+            echo json_encode($response);
+
+            return $result;
+        }
+
+        return false;
+    }
+    private function sendResetLink($email, $token)
+    {
+        $mail = new PHPMailer(true);
+
+        try {
+
+            $mail->SMTPDebug = 0;
+            $mail->isSMTP();
+            $mail->Host = MailSetup::$SMTP_HOST;
+            $mail->SMTPAuth = true;
+            $mail->Username = MailSetup::$SMTP_USERNAME;
+            $mail->Password = MailSetup::$SMTP_PASSWORD;
+            $mail->SMTPSecure = MailSetup::$SMTP_ENCRYPTION;
+            $mail->Port = MailSetup::$SMTP_PORT;
+            $mail->setFrom(MailSetup::$SMTP_FROM_ADDRESS, "City University");
+            $mail->addAddress($email, 'Guest');
+            $mail->isHTML(true);
+            $mail->Subject = 'Password Reset Link';
+            $mail->Body = "
+            <div style='font-size: 18px; width:90%; max-width: 600px; margin: 5px auto 35px auto;'>
+                <div style='margin-bottom: 10px;'>Hi!</div>
+                <div>You requested to recover your account on City University Hostel. To reset your account password, please follow the link
+                    below:</div>
+                <div style='margin-top: 25px; text-align:center;'>
+                    <a href='http://localhost/HostelManagementSystem/Authentication/resetPassword.php?token=$token&email=$email'
+                        style='background:
+                        #009688; text-transform: uppercase; border-radius:3px; padding: 5px 14px; color: white; border: 1px
+                        solid #009688; font-size:17px; font-weight: bold; text-decoration: none;'>Reset Password</a>
+                </div>
+            </div>
+            ";
+
+            $mail->send();
+        } catch (Exception $e) {
+            error_log("Email sending failed: " . $e->getMessage());
+            throw new Exception("Failed to send confirmation email.");
+        }
     }
     public function signout()
     {
@@ -160,7 +256,66 @@ class AuthHandler
         session_destroy();
         return;
     }
+    public function resetPassword($email, $newPassword, $token)
+    {
+        // Check if the token is valid
+        $query = "SELECT user_id FROM password_reset_tokens WHERE user_id = (SELECT id FROM users WHERE mail = ?) AND token = ? ";
+        $stmt = $this->db->prepare($query);
 
+        if ($stmt) {
+            $stmt->bind_param("ss", $email, $token);
+            $stmt->execute();
+            $stmt->store_result();
+
+            if ($stmt->num_rows === 0) {
+                $stmt->close();
+                error_log("Invalid token for email: $email and token: $token");
+                return false; // Invalid token
+            }
+            $stmt->close();
+        } else {
+            error_log("Query preparation failed for resetPassword");
+            return false; // Query preparation failed
+        }
+
+        // Token is valid, proceed to update the password
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+
+        $query = "UPDATE users SET password = ? WHERE mail = ?";
+        $stmt = $this->db->prepare($query);
+
+        if ($stmt) {
+            $stmt->bind_param("ss", $hashedPassword, $email);
+            $result = $stmt->execute();
+            $stmt->close();
+
+            // Remove the used token
+            $this->removeToken($email, $token);
+
+            if ($result) {
+                error_log("Password reset successful for email: $email");
+            } else {
+                error_log("Failed to reset password for email: $email");
+            }
+
+            return $result;
+        }
+
+        error_log("Query preparation failed for updating password");
+        return false;
+    }
+
+    private function removeToken($email, $token)
+    {
+        $query = "DELETE FROM password_reset_tokens WHERE user_id = (SELECT id FROM users WHERE mail = ?) AND token = ?";
+        $stmt = $this->db->prepare($query);
+
+        if ($stmt) {
+            $stmt->bind_param("ss", $email, $token);
+            $stmt->execute();
+            $stmt->close();
+        }
+    }
     public function updatePassword($email, $newPassword)
     {
         $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
@@ -239,58 +394,7 @@ class AuthHandler
         // Return success or error message
     }
 
-    public function acceptUserRequest($userId)
-    {
-        // Implement logic to accept a user request
-        // Return success or error message
-    }
 
-    public function cancelUserRequest($userId)
-    {
-        // Implement logic to cancel a user request
-        // Return success or error message
-    }
-    public function approveApplication($applicationId, $approverId)
-    {
-        $checkQuery = "SELECT * FROM applications WHERE application_id = ? AND status = 'pending'";
-        $checkStmt = mysqli_prepare($this->db, $checkQuery);
-
-        if (!$checkStmt) {
-            die("Error preparing statement: " . mysqli_error($this->db));
-        }
-
-        mysqli_stmt_bind_param($checkStmt, "i", $applicationId);
-        mysqli_stmt_execute($checkStmt);
-        mysqli_stmt_store_result($checkStmt);
-
-        $rowCount = mysqli_stmt_num_rows($checkStmt);
-
-        if ($rowCount === 0) {
-            // Application not found or already approved/canceled
-            mysqli_stmt_close($checkStmt);
-            return false;
-        }
-
-        // Update the application status to 'approved' and set the approver
-        $updateQuery = "UPDATE applications SET status = 'approved', approved_by = ? WHERE application_id = ?";
-        $updateStmt = mysqli_prepare($this->db, $updateQuery);
-
-        if (!$updateStmt) {
-            die("Error preparing statement: " . mysqli_error($this->db));
-        }
-
-        mysqli_stmt_bind_param($updateStmt, "ii", $approverId, $applicationId);
-        $updateResult = mysqli_stmt_execute($updateStmt);
-
-        if (!$updateResult) {
-            die("Error updating application: " . mysqli_error($this->db));
-        }
-
-        mysqli_stmt_close($checkStmt);
-        mysqli_stmt_close($updateStmt);
-
-        return true;
-    }
     public function getUserName($userId)
     {
         $query = "SELECT name FROM users WHERE id = ?";

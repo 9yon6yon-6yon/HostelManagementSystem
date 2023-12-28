@@ -26,10 +26,22 @@ if (isset($_GET['id'])) {
     } else {
         $formattedDate = date("M d, Y", strtotime($user['date_of_birth']));
         $tableRow = '';
+        $emergencyContactName = "<span class='highlight'>{$user['emergency_contact_name']}</span>";
+
         $tableRow .= "
-                <h5 class='card-body-title'>{$user['name']}</h5> <p>{$user['mail']}</p>
-                <p class='card-subtitle tx-normal mg-b-15'> DOB : {$formattedDate}</p>
-                <p class='card-text'>{$user['phone_number']}</p>
+                    <h5 class='card-body-title'>{$user['name']}</h5>
+                    <img src='{$user['profile_pic_path']}' alt='Profile Picture' class='profile-pic'>
+                    <p class='card-subtitle tx-normal mg-b-15'>Date of Birth: {$formattedDate}</p>
+                    <p class='card-text'>Phone Number: {$user['phone_number']}</p>
+                    <p class='card-text'>Address: {$user['address']}</p>
+                    <p class='card-text'>Gender: {$user['gender']}</p>
+                    <p class='card-text'>Nationality: {$user['nationality']}</p>
+                    <p class='card-text'>Emergency Contact: {$emergencyContactName}</p>
+                    <p class='card-text'>Emergency Contact Phone: {$user['emergency_contact_phone']}</p>
+                    <p class='card-text'>Blood Type: {$user['blood_type']}</p>
+                    <p class='card-text'>Medical Conditions: {$user['medical_conditions']}</p>
+                    <p class='card-text'>Hobbies: {$user['hobbies']}</p>
+                    <p class='card-text'>About Me: {$user['about_me']}</p>
                 ";
         $pages =  [
             ['url' => 'dashboard.php', 'label' => 'Dashboard'],
@@ -173,28 +185,6 @@ $script = "$(function(){
     });
     console.log(formData);
 }
-
-function showAlert(type, message) {
-    var alertClasses = {
-      'success': 'alert-success',
-      'danger': 'alert-danger',
-      'info': 'alert-info',
-      'warning': 'alert-warning',
-      'primary': 'alert-primary',
-      'secondary': 'alert-secondary'
-    };
-
-    var alertClass = alertClasses[type] || 'alert-info';
-    var alertHtml = '<div class=\"alert ' + alertClass + ' alert-dismissible fade show\" role=\"alert\">' +
-        message +
-        '<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\">' +
-        '<span aria-hidden=\"true\">&times;</span>' +
-        '</button>' +
-        '</div>';
-
-    // Append the alert to a container (e.g., a div with id=\"alerts\")
-    $('#alerts').html(alertHtml);
-    }
 
     // Add event listener for form submission
     $('#createUserForm').on('submit', function(e) {

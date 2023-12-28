@@ -18,7 +18,7 @@
         </a>
         <div class="dropdown-menu dropdown-menu-header wd-200">
           <ul class="list-unstyled user-profile-nav">
-            <li><a href="../Authentication/user-profile.php"><i class="icon ion-ios-person-outline"></i> Edit Profile</a></li>
+            <li><a href="profile.php"><i class="icon ion-ios-person-outline"></i> Edit Profile</a></li>
             <li><a href="#"><i class="icon ion-ios-gear-outline"></i> Settings</a></li>
             <li><a href="#" data-action="signout"><i class="icon ion-power"></i> Sign Out</a></li>
           </ul>

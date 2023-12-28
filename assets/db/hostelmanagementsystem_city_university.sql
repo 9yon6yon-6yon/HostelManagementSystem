@@ -203,10 +203,10 @@ CREATE TABLE IF NOT EXISTS `seat_allocation` (
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL DEFAULT 'guest',
   `mail` varchar(255) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `role` enum('admin','student','provost','hallsuper','accounts') NOT NULL,
+  `password` varchar(255) NOT NULL DEFAULT 'password',
+  `role` enum('admin','student','provost','hallsuper','accounts') NOT NULL DEFAULT 'student',
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `verified` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
@@ -258,9 +258,32 @@ CREATE TABLE IF NOT EXISTS `visitors` (
   KEY `fk_visitors_visiting_student` (`visiting_student_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `password_reset_tokens`
+--
+DROP TABLE IF EXISTS `password_reset_tokens`;
+CREATE TABLE IF NOT EXISTS `password_reset_tokens` (
+  `reset_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  PRIMARY KEY (`reset_id`),
+  UNIQUE KEY `unique_token` (`token`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `password_reset_tokens`
+--
+ALTER TABLE `password_reset_tokens`
+  ADD CONSTRAINT `password_reset_tokens_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+COMMIT;
 
 --
 -- Constraints for table `applications`

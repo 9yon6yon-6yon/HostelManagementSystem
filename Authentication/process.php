@@ -19,6 +19,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $authHandler = new AuthHandler();
                 $authHandler->login($email, $password);
                 break;
+            case 'forgotpassword':
+                $email =  $_POST['email'];
+                $authHandler = new AuthHandler();
+                return $authHandler->forgotPassword($email);
+                break;
+            case 'reset-password':
+                $email = $_POST['email'];
+                $password = $_POST['password'];
+                $confirmPassword = $_POST['confirm_password'];
+                $token = $_POST['token'];
+
+                // Validate the form data
+                if (empty($email) || empty($password) || empty($confirmPassword) || empty($token)) {
+                    $response = ['error' => 'Please fill in all required fields.'];
+                } elseif ($password !== $confirmPassword) {
+                    $response = ['error' => 'Password and confirm password do not match.'];
+                } else {
+                    $authHandler = new AuthHandler();
+                    $result = $authHandler->resetPassword($email, $password, $token);
+
+                    if ($result) {
+                        $response = ['success' => 'Password reset successful.'];
+                    } else {
+                        $response = ['error' => 'Failed to reset password.'];
+                    }
+                }
+                break;
             default:
                 $response = ['error' => 'Invalid action for POST request'];
                 break;

@@ -38,6 +38,29 @@
       });
     });
   </script>
+  <script>
+    function showAlert(type, message) {
+      var alertClasses = {
+        'success': 'alert-success',
+        'danger': 'alert-danger',
+        'info': 'alert-info',
+        'warning': 'alert-warning',
+        'primary': 'alert-primary',
+        'secondary': 'alert-secondary'
+      };
+
+      var alertClass = alertClasses[type] || 'alert-info';
+      var alertHtml = '<div class=\"alert ' + alertClass + ' alert-dismissible fade show\" role=\"alert\">' +
+        message +
+        '<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\">' +
+        '<span aria-hidden=\"true\">&times;</span>' +
+        '</button>' +
+        '</div>';
+
+      // Append the alert to a container (e.g., a div with id=\"alerts\")
+      $('#alerts').html(alertHtml);
+    }
+  </script>
   </body>
 
   </html>
