@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $email =  $_POST['email'];
                 $password = $_POST['password'];
                 $authHandler = new AuthHandler();
-                $authHandler->login($email, $password);
+                return $authHandler->login($email, $password);
                 break;
             case 'forgotpassword':
                 $email =  $_POST['email'];
@@ -73,8 +73,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
 header('Content-Type: application/json');
 echo json_encode($response);
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
