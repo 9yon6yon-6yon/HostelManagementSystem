@@ -652,10 +652,31 @@ class AuthHandler
         echo json_encode($response);
         return false;
     }
-    public function paynow($id){
-        
-    }
+    public function paynow($id, $amount, $tx_id)
+    {
+        $query = "INSERT INTO payment (user, amount, status, date, transaction_id) VALUES (?, ?, 'pending', NOW(),?)";
+        $stmt = $this->db->prepare($query);
 
+        if ($stmt) {
+            $stmt->bind_param("ids", $id, $amount, $tx_id);
+            $result = $stmt->execute();
+            $stmt->close();
+            if ($result) {
+                $response = ['success' => 'Payment details saved successfully'];
+            } else {
+                $response = ['error' => 'Failed to save payment details.'];
+            }
+            header('Content-Type: application/json');
+            echo json_encode($response);
+            return;
+        } else {
+            $response = ['error' => 'Failed to prepare the SQL statement.'];
+        }
+        $response = ['error' => 'Failed to pay'];
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        return false;
+    }
 }
 
 error_reporting(E_ALL);

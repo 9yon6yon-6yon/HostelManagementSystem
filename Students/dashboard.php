@@ -90,7 +90,7 @@ $content = "
 </div><!-- row -->
 <div class=\"row row-sm mg-t-20\">
     <div class=\"col-sm-6 col-xl-4\">
-        <a href=\"application.php\" class=\"card-link\">
+        <a href=\"payment.php\" class=\"card-link\">
             <div class=\"card pd-20 pd-sm-25\">
                 <div class=\"d-flex align-items-center justify-content-between mg-b-10\">
                     <h6 class=\"card-body-title tx-12 tx-spacing-1\">icon</h6>
@@ -101,7 +101,7 @@ $content = "
         </a>
     </div><!-- col-3 -->
     <div class=\"col-sm-6 col-xl-4 mg-t-20 mg-sm-t-0\">
-        <a href=\"application.php\" class=\"card-link\">
+        <a href=\"transaction-history.php\" class=\"card-link\">
             <div class=\"card bg-purple tx-white pd-25\">
                 <div class=\"d-flex align-items-center justify-content-between mg-b-10\">
                     <h6 class=\"card-body-title tx-12 tx-white-8 tx-spacing-1\">icon</h6>
@@ -111,7 +111,7 @@ $content = "
         </a>
     </div><!-- col-3 -->
     <div class=\"col-sm-6 col-xl-4 mg-t-20 mg-xl-t-0\">
-        <a href=\"application.php\" class=\"card-link\">
+        <a href=\"room-details.php\" class=\"card-link\">
             <div class=\"card pd-20 pd-sm-25\">
                 <div class=\"d-flex align-items-center justify-content-between mg-b-10\">
                     <h6 class=\"card-body-title tx-12 tx-spacing-1\">icon</h6>

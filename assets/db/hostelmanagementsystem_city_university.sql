@@ -3,15 +3,13 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Dec 22, 2023 at 06:55 PM
+-- Generation Time: Jan 04, 2024 at 06:35 PM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 8.1.2
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
-SET GLOBAL time_zone = "+06:00";
-SET time_zone ="+06:00";
-
+SET time_zone = "+06:00";
 
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -103,6 +101,23 @@ CREATE TABLE IF NOT EXISTS `notice` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `password_reset_tokens`
+--
+
+DROP TABLE IF EXISTS `password_reset_tokens`;
+CREATE TABLE IF NOT EXISTS `password_reset_tokens` (
+  `reset_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  PRIMARY KEY (`reset_id`),
+  UNIQUE KEY `unique_token` (`token`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `payment`
 --
 
@@ -117,6 +132,7 @@ CREATE TABLE IF NOT EXISTS `payment` (
   `transaction_id` varchar(255) DEFAULT NULL,
   `others` text DEFAULT NULL,
   PRIMARY KEY (`payment_id`),
+  UNIQUE KEY `transaction_id` (`transaction_id`),
   KEY `fk_payment_user` (`user`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -205,7 +221,7 @@ CREATE TABLE IF NOT EXISTS `seat_allocation` (
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL DEFAULT 'guest',
+  `name` varchar(255) NOT NULL,
   `mail` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL DEFAULT 'password',
   `role` enum('admin','student','provost','hallsuper','accounts') NOT NULL DEFAULT 'student',
@@ -260,32 +276,9 @@ CREATE TABLE IF NOT EXISTS `visitors` (
   KEY `fk_visitors_visiting_student` (`visiting_student_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
--- --------------------------------------------------------
---
--- Table structure for table `password_reset_tokens`
---
-DROP TABLE IF EXISTS `password_reset_tokens`;
-CREATE TABLE IF NOT EXISTS `password_reset_tokens` (
-  `reset_id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
-  `token` varchar(255) NOT NULL,
-  `expires_at` datetime NOT NULL,
-  PRIMARY KEY (`reset_id`),
-  UNIQUE KEY `unique_token` (`token`),
-  KEY `user_id` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 --
 -- Constraints for dumped tables
 --
-
---
--- Constraints for table `password_reset_tokens`
---
-ALTER TABLE `password_reset_tokens`
-  ADD CONSTRAINT `password_reset_tokens_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-COMMIT;
 
 --
 -- Constraints for table `applications`
@@ -311,6 +304,12 @@ ALTER TABLE `inventory`
 --
 ALTER TABLE `notice`
   ADD CONSTRAINT `fk_notice_updated_by` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `password_reset_tokens`
+--
+ALTER TABLE `password_reset_tokens`
+  ADD CONSTRAINT `password_reset_tokens_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `payment`

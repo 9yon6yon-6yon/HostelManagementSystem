@@ -19,8 +19,6 @@ if (isset($_GET['id'])) {
                 <p class='card-subtitle tx-normal mg-b-15'> uploaded at : {$formattedDate}</p>
                
                 <p class='card-text'>{$notice['description']}</p>
-                <a href='#' class='card-link'>Aurthor</a>
-              
                 ";
     $pages =  [
         ['url' => 'dashboard.php', 'label' => 'Dashboard'],
@@ -43,14 +41,16 @@ if (isset($_GET['id'])) {
 $notices_all = $databaseHandler->getNotices();
 $tableRows = '';
 foreach ($notices_all as $notices) {
+    if ($notices['visibility'] === 'public' || $notices['visibility'] === 'student') {
     $formattedDate = date("M d, Y g:ia", strtotime($notices['date']));
-    $tableRows .= "<tr>
-        <td class='wd-5p tx-center'>{$notices['notice_id']}</td>
+    $tableRows .= "
+    <tr>
+        <td class='tx-center'>{$formattedDate}</td>
         <td>
             <a href=\"notices.php?id={$notices['notice_id']}\" class=\"tx-inverse tx-14 tx-medium d-block\">{$notices['title']}</a>
         </td>
-        <td class='tx-center'>{$formattedDate}</td>
     </tr>";
+    }
 }
 $content .= "
 <div class='card pd-20 pd-sm-40'>
@@ -59,10 +59,8 @@ $content .= "
         <table id='datatable1' class='table display responsive nowrap'>
             <thead>
                 <tr>
-                    <th class='wd-5p'>ID</th>
-                    <th class='wd-15p'>Title</th>
-                    <th class='wd-15p tx-center'>Published at</th>
-
+                <th class='wd-15p tx-center'>Published at</th>
+                <th class='wd-15p'>Title</th>
                 </tr>
             </thead>
             <tbody>

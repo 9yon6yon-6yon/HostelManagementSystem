@@ -39,8 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $post_data['success_url'] = "http://localhost/HostelManagementSystem/Students/success.php";
                 $post_data['fail_url'] = "http://localhost/HostelManagementSystem/Students/fail.php";
                 $post_data['cancel_url'] = "http://localhost/HostelManagementSystem/Students/payment.php";
-              
-                
+
                 $post_data['cus_name'] =  $authHandler->getUserName($_SESSION['user_id']);
                 $direct_api_url = "https://sandbox.sslcommerz.com/gwprocess/v3/api.php";
 
@@ -81,6 +80,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $response = ['error' => 'JSON Data parsing error!'];
                 }
                 break;
+            case 'success-pay':
+                session_start();
+                $id = $_SESSION['user_id'];
+                $amount = $_POST['amount'];
+                $tran_id = $_POST['tran_id'];
+                $authHandler = new AuthHandler();
+                return $authHandler->paynow($id, $amount, $tran_id);
+                break;
+
             default:
                 $response = ['error' => 'Invalid action for POST request'];
                 break;
