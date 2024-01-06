@@ -9,11 +9,11 @@
       <div class="dropdown">
         <a href="" class="nav-link nav-link-profile" data-toggle="dropdown">
           <span class="logged-name"><?php
-          include_once('../Authentication/AuthHandler.php');
-          $authHandler = new AuthHandler();
-          $user_id = $_SESSION['user_id'];
-          $username = $authHandler->getUserName($user_id);
-          echo $username; ?></span>
+                                    include_once('../Authentication/AuthHandler.php');
+                                    $authHandler = new AuthHandler();
+                                    $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+                                    $username = $authHandler->getUserName($user_id);
+                                    echo $user_id ? $username : 'Guest'; ?></span>
           <img src="#" class="wd-32 rounded-circle" alt="">
         </a>
         <div class="dropdown-menu dropdown-menu-header wd-200">
