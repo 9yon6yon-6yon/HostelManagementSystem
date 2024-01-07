@@ -88,7 +88,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $authHandler = new AuthHandler();
                 return $authHandler->paynow($id, $amount, $tran_id);
                 break;
-
+            case 'fail-pay':
+                session_start();
+                break;
             default:
                 $response = ['error' => 'Invalid action for POST request'];
                 break;
@@ -102,7 +104,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (isset($_GET['action'])) {
         switch ($_GET['action']) {
-            case '#':
+            case 'load-room':
+                $authHandler = new AuthHandler();
+                return $authHandler->rooms();
+                break;
+            case 'load-seat':
+                if (isset($_GET['room_id'])) {
+                    $room_id = $_GET['room_id'];
+                    $authHandler = new AuthHandler();
+                    return $authHandler->seats($room_id);
+                } else {
+                    $response = ['error' => 'Missing room_id parameter for load-seat action'];
+                }
                 break;
 
             default:

@@ -677,6 +677,45 @@ class AuthHandler
         echo json_encode($response);
         return false;
     }
+    public function rooms(){
+        $query = "SELECT room_id, room_no FROM room";
+        $stmt = $this->db->prepare($query);
+
+        if ($stmt) {
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $rooms = $result->fetch_all(MYSQLI_ASSOC);
+            $stmt->close();
+
+
+            header('Content-Type: application/json');
+            echo json_encode($rooms);
+        } else {
+
+            http_response_code(500);
+            echo json_encode(array("error" => "Failed to prepare statement"));
+        }
+        
+    }
+    public function seats($room_id){
+        $query = "SELECT seat_id , seat_id as seat_no FROM seats WHERE room_no = ?";
+        $stmt = $this->db->prepare($query);
+
+        if ($stmt) {
+            $stmt->bind_param("i", $room_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $seats = $result->fetch_all(MYSQLI_ASSOC);
+            $stmt->close();
+
+            header('Content-Type: application/json');
+            echo json_encode($seats);
+        } else {
+
+            http_response_code(500);
+            echo json_encode(array("error" => "Failed to prepare statement"));
+        }
+    }
 }
 
 error_reporting(E_ALL);
