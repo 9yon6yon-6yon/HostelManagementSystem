@@ -678,7 +678,9 @@ class AuthHandler
         return false;
     }
     public function rooms(){
-        $query = "SELECT room_id, room_no FROM room";
+        $query = "SELECT room.room_id, room.room_no, room.status, building.building_name
+        FROM room
+        LEFT JOIN building ON room.building_id = building.building_id";
         $stmt = $this->db->prepare($query);
 
         if ($stmt) {
@@ -698,7 +700,10 @@ class AuthHandler
         
     }
     public function seats($room_id){
-        $query = "SELECT seat_id , seat_id as seat_no FROM seats WHERE room_no = ?";
+        $query = "SELECT seats.seat_id, seats.status, room.room_no
+        FROM seats
+        JOIN room ON seats.room_no = room.room_id
+        WHERE seats.room_no = ?";
         $stmt = $this->db->prepare($query);
 
         if ($stmt) {
