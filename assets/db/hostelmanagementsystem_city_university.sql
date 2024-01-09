@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Jan 04, 2024 at 06:35 PM
+-- Generation Time: Jan 09, 2024 at 09:51 AM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 8.1.2
 
@@ -32,8 +32,8 @@ USE `hostelmanagementsystem_city_university`;
 DROP TABLE IF EXISTS `applications`;
 CREATE TABLE IF NOT EXISTS `applications` (
   `application_id` int(11) NOT NULL AUTO_INCREMENT,
-  `path_to_file` varchar(255) NOT NULL,
-  `application_type` enum('leave','room_allocation','complaint','cancel') NOT NULL,
+  `path_to_file` varchar(255) DEFAULT NULL,
+  `application_type` enum('leave','complaint') NOT NULL,
   `status` enum('pending','approved','canceled') NOT NULL,
   `applied_by` int(11) NOT NULL,
   `approved_by` int(11) DEFAULT NULL,
@@ -42,7 +42,31 @@ CREATE TABLE IF NOT EXISTS `applications` (
   PRIMARY KEY (`application_id`),
   KEY `fk_applications_applied_by` (`applied_by`),
   KEY `fk_applications_approved_by` (`approved_by`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `building`
+--
+
+DROP TABLE IF EXISTS `building`;
+CREATE TABLE IF NOT EXISTS `building` (
+  `building_id` int(11) NOT NULL AUTO_INCREMENT,
+  `building_name` varchar(255) NOT NULL,
+  `building_type` enum('male','female') NOT NULL,
+  PRIMARY KEY (`building_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `building`
+--
+
+INSERT INTO `building` (`building_id`, `building_name`, `building_type`) VALUES
+(1, 'ফজলুর রহমান হল', 'male'),
+(2, 'মকবুল হোসেন হাল', 'male'),
+(3, 'ফাতেমা হল', 'female'),
+(4, 'মোনা হোসেন হল', 'female');
 
 -- --------------------------------------------------------
 
@@ -59,7 +83,7 @@ CREATE TABLE IF NOT EXISTS `feedback` (
   `date` datetime(6) NOT NULL,
   PRIMARY KEY (`feedback_id`),
   KEY `fk_feedback_user` (`usr`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -78,7 +102,7 @@ CREATE TABLE IF NOT EXISTS `inventory` (
   `last_updated_date` datetime(6) NOT NULL,
   PRIMARY KEY (`inventory_id`),
   KEY `fk_inventory_last_updated_by` (`last_updated_by`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -96,7 +120,7 @@ CREATE TABLE IF NOT EXISTS `notice` (
   `updated_by` int(11) DEFAULT NULL,
   PRIMARY KEY (`notice_id`),
   KEY `fk_notice_updated_by` (`updated_by`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -113,7 +137,7 @@ CREATE TABLE IF NOT EXISTS `password_reset_tokens` (
   PRIMARY KEY (`reset_id`),
   UNIQUE KEY `unique_token` (`token`),
   KEY `user_id` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -134,7 +158,7 @@ CREATE TABLE IF NOT EXISTS `payment` (
   PRIMARY KEY (`payment_id`),
   UNIQUE KEY `transaction_id` (`transaction_id`),
   KEY `fk_payment_user` (`user`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -153,7 +177,7 @@ CREATE TABLE IF NOT EXISTS `requests` (
   PRIMARY KEY (`request_id`),
   KEY `fk_requests_user` (`usr`),
   KEY `fk_requests_resolved_by` (`resolved_by`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -168,8 +192,24 @@ CREATE TABLE IF NOT EXISTS `room` (
   `room_no` int(11) NOT NULL,
   `no_of_seats` int(11) NOT NULL,
   `status` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`room_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `building_id` int(11) NOT NULL,
+  PRIMARY KEY (`room_id`),
+  KEY `fk_room_building` (`building_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `room`
+--
+
+INSERT INTO `room` (`room_id`, `floor`, `room_no`, `no_of_seats`, `status`, `building_id`) VALUES
+(1, 1, 101, 20, 'available', 1),
+(2, 1, 102, 20, 'available', 1),
+(3, 2, 201, 25, 'available', 2),
+(4, 2, 202, 22, 'available', 2),
+(5, 1, 101, 15, 'available', 3),
+(6, 1, 102, 16, 'available', 3),
+(7, 2, 201, 30, 'available', 4),
+(8, 2, 202, 28, 'available', 4);
 
 -- --------------------------------------------------------
 
@@ -182,12 +222,10 @@ CREATE TABLE IF NOT EXISTS `seats` (
   `seat_id` int(11) NOT NULL AUTO_INCREMENT,
   `room_no` int(11) DEFAULT NULL,
   `status` varchar(255) DEFAULT NULL,
-  `occupied_by` int(11) DEFAULT NULL,
   `date` datetime(6) NOT NULL,
   PRIMARY KEY (`seat_id`),
-  KEY `fk_seats_room` (`room_no`),
-  KEY `fk_seats_occupied_by` (`occupied_by`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  KEY `fk_seats_room` (`room_no`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -207,10 +245,10 @@ CREATE TABLE IF NOT EXISTS `seat_allocation` (
   `lease_end_date` datetime(6) NOT NULL,
   `status` enum('booked','expired','pending') DEFAULT NULL,
   PRIMARY KEY (`seat_allocation_id`),
-  KEY `fk_seat_allocation_seats` (`seat_no`),
   KEY `fk_seat_allocation_student` (`student`),
-  KEY `fk_seat_allocation_allocated_by` (`allocated_by`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  KEY `fk_seat_allocation_allocated_by` (`allocated_by`),
+  KEY `fk_seat_allocation_seats` (`seat_no`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -229,7 +267,16 @@ CREATE TABLE IF NOT EXISTS `users` (
   `verified` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `mail` (`mail`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `name`, `mail`, `password`, `role`, `is_active`, `verified`) VALUES
+(1, 'Asif', 'asifkarim808@gmail.com', '$2y$10$bHHUXwgd5TDL8HzNWpfu2OO4OAsdrFd1TZWta2OuwqQeElwbzOseS', 'student', 1, 0),
+(2, 'Chayon', 'chayon001122@gmail.com', '$2y$10$AJn4M90kqIsVJpzR5bC06OCnl09no3l0FaE76GA7GltPgF7LFgxNK', 'admin', 1, 0),
+(3, 'Guest', 'mchayon201366@bscse.uiu.ac.bd', '$2y$10$QUfUNohsxbJfVzn/Oa5HW.a28p5v2CqdPv5.dVdU/f.YSL64IpC7O', 'student', 1, 0);
 
 -- --------------------------------------------------------
 
@@ -253,7 +300,7 @@ CREATE TABLE IF NOT EXISTS `user_info` (
   `hobbies` text DEFAULT NULL,
   `about_me` text DEFAULT NULL,
   PRIMARY KEY (`usr`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -274,7 +321,7 @@ CREATE TABLE IF NOT EXISTS `visitors` (
   `checked_out` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`visitor_id`),
   KEY `fk_visitors_visiting_student` (`visiting_student_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 --
 -- Constraints for dumped tables
@@ -325,16 +372,23 @@ ALTER TABLE `requests`
   ADD CONSTRAINT `fk_requests_user` FOREIGN KEY (`usr`) REFERENCES `users` (`id`);
 
 --
+-- Constraints for table `room`
+--
+ALTER TABLE `room`
+  ADD CONSTRAINT `fk_room_building` FOREIGN KEY (`building_id`) REFERENCES `building` (`building_id`);
+
+--
 -- Constraints for table `seats`
 --
 ALTER TABLE `seats`
-  ADD CONSTRAINT `fk_seats_occupied_by` FOREIGN KEY (`occupied_by`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `fk_seats_room` FOREIGN KEY (`room_no`) REFERENCES `room` (`room_id`);
 
 --
 -- Constraints for table `seat_allocation`
 --
 ALTER TABLE `seat_allocation`
   ADD CONSTRAINT `fk_seat_allocation_allocated_by` FOREIGN KEY (`allocated_by`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `fk_seat_allocation_seats` FOREIGN KEY (`seat_no`) REFERENCES `seats` (`seat_id`),
   ADD CONSTRAINT `fk_seat_allocation_student` FOREIGN KEY (`student`) REFERENCES `users` (`id`);
 
 --
