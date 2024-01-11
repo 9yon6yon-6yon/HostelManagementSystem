@@ -700,7 +700,7 @@ class AuthHandler
                     $mail->Body = "
             <div style='font-size: 18px; width:90%; max-width: 600px; margin: 5px auto 35px auto;'>
                 <div style='margin-bottom: 10px;'>Hi {$userName} !</div>
-                <div>Your payment was successfull. Paid amount: <span style='color: green;'>{$amount} tk</span> woth Transaction ID: <span style='color: green;'>{$tx_id}</span></div>
+                <div>Your payment was successfull. Paid amount: <span style='color: green;'>{$amount} tk</span> with Transaction ID: <span style='color: green;'>{$tx_id}</span></div>
         
             </div>
             ";
