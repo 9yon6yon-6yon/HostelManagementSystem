@@ -40,7 +40,11 @@ $(document).ready(function() {
         },
         dataType: 'json',
         success: function(response) {
-            console.log(response);
+            if (response.success) {
+                showAlert('success', response.success);
+            } else {
+                showAlert('error', response.error);
+            }
         },
         error: function(error) {
             console.error('Error:', error);
@@ -50,8 +54,4 @@ $(document).ready(function() {
 });
 ";
 
-// setTimeout(function() {
-//     // Replace 'your_target_page.php' with the actual URL you want to redirect to
-//     window.location.href = 'payment.php';
-// }, 3000);
 include '../templates/base.php';

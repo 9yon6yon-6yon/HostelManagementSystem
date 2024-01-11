@@ -34,3 +34,9 @@
         <span class="menu-item-label">Payments</span>
     </div><!-- menu-item -->
 </a><!-- sl-menu-link -->
+<a href="manage-rooms.php" class="sl-menu-link">
+    <div class="sl-menu-item">
+        <i class="menu-item-icon fa fa-bed tx-20"></i>
+        <span class="menu-item-label">Manage Seat</span>
+    </div><!-- menu-item -->
+</a><!-- sl-menu-link -->

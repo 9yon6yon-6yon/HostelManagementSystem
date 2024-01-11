@@ -31,6 +31,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $authHandler = new AuthHandler();
                 return $authHandler->makeAnnouncement($id, $title, $visibility, $description);
                 break;
+            case 'room-approve':
+                $id = $_POST['sa_id'];
+                $authHandler = new AuthHandler();
+                return $authHandler->approve_seat_allocation_request($id);
+                break;
             case 'requestPayment':
                 $id = $_POST['paymentId'];
                 $databaseHandler = new DatabaseHandler();
@@ -77,10 +82,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (isset($_GET['action'])) {
         switch ($_GET['action']) {
-            case 'remove_user':
-                // Implement logic to remove a user (soft delete or mark as inactive)
-                // $userId = $_GET['userId'];
-                // $response = $authHandler->removeUser($userId);
+            case 'load-allocation-table':
+                $authHandler = new AuthHandler();
+                return $authHandler->seat_application_of_all_pending();
                 break;
             case 'approve_request':
                 $applicationID = $_GET['applicationID'];

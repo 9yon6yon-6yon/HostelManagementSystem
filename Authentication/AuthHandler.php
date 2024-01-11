@@ -428,6 +428,23 @@ class AuthHandler
 
         return $name ? $name['name'] : "N/A";
     }
+    public function getUserEmail($userId)
+    {
+        $query = "SELECT mail FROM users WHERE id = ?";
+        $stmt = mysqli_prepare($this->db, $query);
+
+        if (!$stmt) {
+            die("Error preparing statement: " . mysqli_error($this->db));
+        }
+
+        mysqli_stmt_bind_param($stmt, "i", $userId);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $mail = mysqli_fetch_assoc($result);
+        mysqli_stmt_close($stmt);
+
+        return $mail ? $mail['mail'] : "N/A";
+    }
 
     public function approveUserRequest($applicationId, $approverId)
     {
@@ -663,6 +680,36 @@ class AuthHandler
             $stmt->close();
             if ($result) {
                 $response = ['success' => 'Payment details saved successfully'];
+                $userName = $this->getUserName($id);
+                $userMail = $this->getUserEmail($id);
+                $mail = new PHPMailer(true);
+                try {
+
+                    $mail->SMTPDebug = 0;
+                    $mail->isSMTP();
+                    $mail->Host = MailSetup::$SMTP_HOST;
+                    $mail->SMTPAuth = true;
+                    $mail->Username = MailSetup::$SMTP_USERNAME;
+                    $mail->Password = MailSetup::$SMTP_PASSWORD;
+                    $mail->SMTPSecure = MailSetup::$SMTP_ENCRYPTION;
+                    $mail->Port = MailSetup::$SMTP_PORT;
+                    $mail->setFrom(MailSetup::$SMTP_FROM_ADDRESS, "City University");
+                    $mail->addAddress($userMail, $userName);
+                    $mail->isHTML(true);
+                    $mail->Subject = 'Payment Details';
+                    $mail->Body = "
+            <div style='font-size: 18px; width:90%; max-width: 600px; margin: 5px auto 35px auto;'>
+                <div style='margin-bottom: 10px;'>Hi {$userName} !</div>
+                <div>Your payment was successfull. Paid amount: <span style='color: green;'>{$amount} tk</span> woth Transaction ID: <span style='color: green;'>{$tx_id}</span></div>
+        
+            </div>
+            ";
+
+                    $mail->send();
+                } catch (Exception $e) {
+                    error_log("Email sending failed: " . $e->getMessage());
+                    throw new Exception("Failed to send confirmation email.");
+                }
             } else {
                 $response = ['error' => 'Failed to save payment details.'];
             }
@@ -740,18 +787,20 @@ class AuthHandler
                 echo json_encode(array("success" => "Seat allocation request added successfully"));
             } else {
                 http_response_code(500);
+                header('Content-Type: application/json');
                 echo json_encode(array("error" => "Failed to add seat allocation request"));
             }
 
             $stmt->close();
         } else {
             http_response_code(500);
+            header('Content-Type: application/json');
             echo json_encode(array("error" => "Failed to prepare statement"));
         }
     }
     public function approve_seat_allocation_request($allocation_id, $rent = null)
     {
-        $approved_status = 'approved';
+        $approved_status = 'booked';
 
         if ($rent !== null) {
             $update_rent_query = "UPDATE seat_allocation SET rent = ? WHERE seat_allocation_id = ?";
@@ -770,6 +819,7 @@ class AuthHandler
                 $update_rent_stmt->close();
             } else {
                 http_response_code(500);
+                header('Content-Type: application/json');
                 echo json_encode(array("error" => "Failed to prepare rent update statement"));
                 return;
             }
@@ -789,12 +839,14 @@ class AuthHandler
                 echo json_encode(array("success" => "Seat allocation request approved successfully"));
             } else {
                 http_response_code(500);
+                header('Content-Type: application/json');
                 echo json_encode(array("error" => "Failed to approve seat allocation request"));
             }
 
             $stmt->close();
         } else {
             http_response_code(500);
+            header('Content-Type: application/json');
             echo json_encode(array("error" => "Failed to prepare approval statement"));
         }
     }
@@ -904,6 +956,36 @@ class AuthHandler
             echo json_encode(array("error" => "Failed to prepare statement"));
         }
     }
+    public function seat_application_of_all_pending()
+    {
+        $query = "SELECT sa.seat_allocation_id, sa.status, sa.seat_no,
+                     r.room_no, b.building_name,
+                     u.name as user_name,
+                     sa.lease_start_date, sa.lease_end_date
+              FROM seat_allocation sa
+              JOIN seats s ON sa.seat_no = s.seat_id
+              JOIN room r ON s.room_no = r.room_id
+              JOIN building b ON r.building_id = b.building_id
+              JOIN users u ON sa.student = u.id
+              WHERE sa.status ='pending'";
+
+        $stmt = $this->db->prepare($query);
+
+        if ($stmt) {
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $seatApplications = $result->fetch_all(MYSQLI_ASSOC);
+            $stmt->close();
+
+            header('Content-Type: application/json');
+            echo json_encode($seatApplications);
+        } else {
+            http_response_code(500);
+            header('Content-Type: application/json');
+            echo json_encode(array("error" => "Failed to prepare statement"));
+        }
+    }
+
     public function cancel_seat_application($seat_allocation_id, $user_id)
     {
         $query = "DELETE FROM seat_allocation 

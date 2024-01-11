@@ -41,10 +41,10 @@ $.ajax({
     dataType: 'json',
     success: function(response) {
         console.log(response);
-        if (response) {
-            showAlert('success',response.success);
+        if (response.success) {
+            showAlert('success', response.success);
         } else {
-            console.error('Error:', response.error || 'Unknown error');
+            showAlert('error', response.error);
         }
     },
     error: function(error) {

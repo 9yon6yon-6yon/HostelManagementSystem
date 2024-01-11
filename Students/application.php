@@ -25,7 +25,7 @@ $content = "
                         <option value='room_allocation'>Book Seat</option>
                         <option value='renew_room_allocation'>Renew Seat</option>
                         <option value='cancel'>Cancel Seat</option>
-                        <option value='complaint'>Complaint</option>
+                        
 
                     </select>
                 </div>
