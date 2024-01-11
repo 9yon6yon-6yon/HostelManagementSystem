@@ -9,7 +9,6 @@
     │   │   ├── config.php
     │   │   ├── Database.php
     │   │   ├── db-config.php
-    │   │   └── hms.sql
     │   ├── icons
     │   ├── images
     │   ├── js
