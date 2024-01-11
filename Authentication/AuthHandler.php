@@ -677,7 +677,8 @@ class AuthHandler
         echo json_encode($response);
         return false;
     }
-    public function rooms(){
+    public function rooms()
+    {
         $query = "SELECT room.room_id, room.room_no, room.status, building.building_name
         FROM room
         LEFT JOIN building ON room.building_id = building.building_id";
@@ -697,9 +698,9 @@ class AuthHandler
             http_response_code(500);
             echo json_encode(array("error" => "Failed to prepare statement"));
         }
-        
     }
-    public function seats($room_id){
+    public function seats($room_id)
+    {
         $query = "SELECT seats.seat_id, seats.status, room.room_no
         FROM seats
         JOIN room ON seats.room_no = room.room_id
@@ -717,6 +718,213 @@ class AuthHandler
             echo json_encode($seats);
         } else {
 
+            http_response_code(500);
+            echo json_encode(array("error" => "Failed to prepare statement"));
+        }
+    }
+    public function add_seat_allocation_request($seat_no, $student_id, $lease_start_date, $lease_end_date)
+    {
+
+        $status = 'pending';
+        $rent = 3500;
+        $query = "INSERT INTO seat_allocation (seat_no, student, date, rent, lease_start_date, lease_end_date, status)
+                  VALUES (?, ?, NOW(), ?, ?, ?, ?)";
+
+        $stmt = $this->db->prepare($query);
+        if ($stmt) {
+            $stmt->bind_param("iiisss", $seat_no, $student_id, $rent, $lease_start_date, $lease_end_date, $status);
+            $stmt->execute();
+
+            if ($stmt->affected_rows > 0) {
+                header('Content-Type: application/json');
+                echo json_encode(array("success" => "Seat allocation request added successfully"));
+            } else {
+                http_response_code(500);
+                echo json_encode(array("error" => "Failed to add seat allocation request"));
+            }
+
+            $stmt->close();
+        } else {
+            http_response_code(500);
+            echo json_encode(array("error" => "Failed to prepare statement"));
+        }
+    }
+    public function approve_seat_allocation_request($allocation_id, $rent = null)
+    {
+        $approved_status = 'approved';
+
+        if ($rent !== null) {
+            $update_rent_query = "UPDATE seat_allocation SET rent = ? WHERE seat_allocation_id = ?";
+            $update_rent_stmt = $this->db->prepare($update_rent_query);
+
+            if ($update_rent_stmt) {
+                $update_rent_stmt->bind_param("si", $rent, $allocation_id);
+                $update_rent_stmt->execute();
+
+                if ($update_rent_stmt->affected_rows === 0) {
+                    http_response_code(500);
+                    echo json_encode(array("error" => "Failed to update rent value"));
+                    return;
+                }
+
+                $update_rent_stmt->close();
+            } else {
+                http_response_code(500);
+                echo json_encode(array("error" => "Failed to prepare rent update statement"));
+                return;
+            }
+        }
+
+        $query = "UPDATE seat_allocation SET status = ? WHERE seat_allocation_id = ?";
+
+        $stmt = $this->db->prepare($query);
+
+        if ($stmt) {
+            $stmt->bind_param("si", $approved_status, $allocation_id);
+            $stmt->execute();
+
+            if ($stmt->affected_rows > 0) {
+                // The request was approved successfully
+                header('Content-Type: application/json');
+                echo json_encode(array("success" => "Seat allocation request approved successfully"));
+            } else {
+                http_response_code(500);
+                echo json_encode(array("error" => "Failed to approve seat allocation request"));
+            }
+
+            $stmt->close();
+        } else {
+            http_response_code(500);
+            echo json_encode(array("error" => "Failed to prepare approval statement"));
+        }
+    }
+
+    public function renew_seat_allocation($allocation_id, $user_id, $new_start_date, $new_end_date)
+    {
+        $pending_status = 'pending';
+        $approved_status = 'booked';
+
+        // Check if the allocation with the given ID is approved and belongs to the user
+        $check_approval_query = "SELECT status, student FROM seat_allocation WHERE seat_allocation_id = ?";
+        $check_approval_stmt = $this->db->prepare($check_approval_query);
+
+        if ($check_approval_stmt) {
+            $check_approval_stmt->bind_param("i", $allocation_id);
+            $check_approval_stmt->execute();
+            $check_approval_stmt->bind_result($status, $allocated_user);
+            $check_approval_stmt->fetch();
+            $check_approval_stmt->close();
+
+            if ($status !== $approved_status || $allocated_user !== $user_id) {
+                header('Content-Type: application/json');
+                $response = ["error" => "Invalid request. Either the seat allocation is not approved or it does not belong to the user."];
+                echo json_encode($response);
+                return;
+            }
+        } else {
+            header('Content-Type: application/json');
+            $response = ["error" => "Failed to prepare check approval statement"];
+            echo json_encode($response);
+            return;
+        }
+
+        $renew_query = "UPDATE seat_allocation SET status = ?, lease_start_date = ?, lease_end_date = ? WHERE seat_allocation_id = ?";
+        $renew_stmt = $this->db->prepare($renew_query);
+
+        if ($renew_stmt) {
+            $renew_stmt->bind_param("sssi", $pending_status, $new_start_date, $new_end_date, $allocation_id);
+            $renew_stmt->execute();
+
+            if ($renew_stmt->affected_rows > 0) {
+                header('Content-Type: application/json');
+                echo json_encode(array("success" => "Seat allocation renewed successfully"));
+            } else {
+                http_response_code(500);
+                header('Content-Type: application/json');
+                echo json_encode(array("error" => "Failed to renew seat allocation"));
+            }
+
+            $renew_stmt->close();
+        } else {
+            http_response_code(500);
+            echo json_encode(array("error" => "Failed to prepare renewal statement"));
+        }
+    }
+    public function seat_application_of_user($id)
+    {
+        $query = "SELECT sa.seat_allocation_id, sa.seat_no, sa.student, sa.allocated_by, sa.date, sa.rent,
+                         sa.lease_start_date, sa.lease_end_date, sa.status,
+                         r.room_no, b.building_name
+                  FROM seat_allocation sa
+                  JOIN seats s ON sa.seat_no = s.seat_id
+                  JOIN room r ON s.room_no = r.room_id
+                  JOIN building b ON r.building_id = b.building_id
+                  WHERE sa.student = ? AND sa.status ='booked'";
+
+        $stmt = $this->db->prepare($query);
+
+        if ($stmt) {
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $seatApplications = $result->fetch_all(MYSQLI_ASSOC);
+            $stmt->close();
+
+            header('Content-Type: application/json');
+            echo json_encode($seatApplications);
+        } else {
+            http_response_code(500);
+            echo json_encode(array("error" => "Failed to prepare statement"));
+        }
+    }
+
+    public function seat_application_of_user_pending($id)
+    {
+        $query = "SELECT sa.seat_allocation_id, sa.status, sa.seat_no,
+                         r.room_no, b.building_name
+                  FROM seat_allocation sa
+                  JOIN seats s ON sa.seat_no = s.seat_id
+                  JOIN room r ON s.room_no = r.room_id
+                  JOIN building b ON r.building_id = b.building_id
+                  WHERE sa.student = ? AND sa.status ='pending'";
+
+        $stmt = $this->db->prepare($query);
+
+        if ($stmt) {
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $seatApplications = $result->fetch_all(MYSQLI_ASSOC);
+            $stmt->close();
+
+            header('Content-Type: application/json');
+            echo json_encode($seatApplications);
+        } else {
+            http_response_code(500);
+            echo json_encode(array("error" => "Failed to prepare statement"));
+        }
+    }
+    public function cancel_seat_application($seat_allocation_id, $user_id)
+    {
+        $query = "DELETE FROM seat_allocation 
+                  WHERE seat_allocation_id = ? AND student = ?";
+
+        $stmt = $this->db->prepare($query);
+
+        if ($stmt) {
+            $stmt->bind_param("ii", $seat_allocation_id, $user_id);
+            $stmt->execute();
+
+            if ($stmt->affected_rows > 0) {
+                header('Content-Type: application/json');
+                echo json_encode(array("success" => "Your application canceled successfully"));
+            } else {
+                http_response_code(403);
+                echo json_encode(array("error" => "You do not have permission to cancel this seat application"));
+            }
+
+            $stmt->close();
+        } else {
             http_response_code(500);
             echo json_encode(array("error" => "Failed to prepare statement"));
         }

@@ -91,6 +91,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'fail-pay':
                 session_start();
                 break;
+            case 'seat-book':
+                $id = $_SESSION['user_id'];
+                $seat_id = $_POST['seat_no'];
+                $start = $_POST['start'];
+                $end = $_POST['end'];
+                if ($start > $end) {
+                    $response = ["error" => "Start date cannot be after end date"];
+                    break;
+                }
+                $authHandler = new AuthHandler();
+                return $authHandler->add_seat_allocation_request($seat_id, $id, $start, $end);
+                break;
+            case 'renew-room':
+                $id = $_SESSION['user_id'];
+                $sa_id = $_POST['sa_id'];
+                $start = $_POST['start'];
+                $end = $_POST['end'];
+                if ($start > $end) {
+                    $response = ["error" => "Start date cannot be after end date"];
+                    break;
+                }
+                $authHandler = new AuthHandler();
+                return $authHandler->renew_seat_allocation($sa_id, $id, $start, $end);
+                break;
+            case 'room-cancel':
+                $id = $_SESSION['user_id'];
+                $sa_id = $_POST['sa_id'];
+                $authHandler = new AuthHandler();
+                return $authHandler->cancel_seat_application($sa_id, $id);
+                break;
             default:
                 $response = ['error' => 'Invalid action for POST request'];
                 break;
@@ -107,6 +137,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             case 'load-room':
                 $authHandler = new AuthHandler();
                 return $authHandler->rooms();
+                break;
+            case 'load-room-allocation':
+                $id = $_SESSION['user_id'];
+                $authHandler = new AuthHandler();
+                return $authHandler->seat_application_of_user($id);
+                break;
+            case 'load-cancel-allocation':
+                $id = $_SESSION['user_id'];
+                $authHandler = new AuthHandler();
+                return $authHandler->seat_application_of_user_pending($id);
                 break;
             case 'load-seat':
                 if (isset($_GET['room_id'])) {

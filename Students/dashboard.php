@@ -14,7 +14,7 @@ foreach ($notices as $notice) {
     $tableRows .= "<tr>
         <td>{$formattedDate}</td>
         <td>
-            <a href=\"notice.php?id={$notice['notice_id']}\" class=\"tx-inverse tx-14 tx-medium d-block\">{$notice['title']}</a>
+            <a href=\"notices.php?id={$notice['notice_id']}\" class=\"tx-inverse tx-14 tx-medium d-block\">{$notice['title']}</a>
         </td>
     </tr>";
 }
